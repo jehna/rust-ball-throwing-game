@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.8.1", features = ["dynamic"] } # Remove dynamic on deploy!
+bevy = { version = "0.8.1" }
 bevy_rapier3d = { version = "0.17.0", features = [ "simd-stable", "debug-render" ] }
 
 # Enable a small amount of optimization in debug mode

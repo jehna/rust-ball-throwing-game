@@ -1,1 +1,1 @@
-cargo run --bin client
+cargo run --bin client --features bevy/dynamic
