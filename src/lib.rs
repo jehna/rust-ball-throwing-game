@@ -1,5 +1,6 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
+use web_sys::Blob;
 
 pub fn setup(
     mut commands: Commands,
