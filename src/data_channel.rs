@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use bevy::prelude::{Vec2, Vec3};
+use bevy::prelude::{Quat, Vec2, Vec3};
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 
@@ -8,17 +8,23 @@ use crate::websocket::connect_websocket;
 
 pub type UserId = u16;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum ServerMessage {
-    NewPlayerPosition(UserId, Vec3),
+    NewPlayerPosition(UserId, Vec3, Quat),
     NewPlayerJoined(UserId),
     SetLocalUserId(UserId),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum ClientMessage {
-    Move(Vec2),
-    Jump,
+    Join,
+    Move(Vec3, Quat),
+}
+
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+pub struct UserMessage {
+    pub user_id: UserId,
+    pub message: ClientMessage,
 }
 
 pub struct ClientDataChannelResource {

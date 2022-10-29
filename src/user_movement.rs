@@ -1,5 +1,5 @@
 use crate::current_user::CurrentUser;
-use crate::data_channel::UserId;
+use crate::data_channel::{ServerMessage, UserId};
 use bevy::prelude::Component;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
@@ -10,41 +10,27 @@ pub struct User {
 }
 
 pub fn user_movement(
-    keyboard_input: Res<Input<KeyCode>>,
     current_user: Res<CurrentUser>,
-    mut mouse_input: EventReader<MouseMotion>,
+    mut server_events: EventReader<ServerMessage>,
     mut component: Query<(&User, &mut Transform, &mut Velocity)>,
 ) {
-    if current_user.id.is_none() {
-        return;
-    }
-
     for (user, mut transform, mut velociy) in &mut component {
-        if user.id != current_user.id.unwrap() {
+        if current_user.id.is_some() && user.id == current_user.id.unwrap() {
+            // Handle current user locally for now
             continue;
         }
 
-        let mut direction = Vec3::ZERO;
-        if keyboard_input.pressed(KeyCode::W) {
-            direction -= transform.forward();
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            direction += transform.forward();
-        }
-        if keyboard_input.pressed(KeyCode::A) {
-            direction -= transform.left();
-        }
-        if keyboard_input.pressed(KeyCode::D) {
-            direction += transform.left();
-        }
-        transform.translation += direction * 0.05;
+        let move_user = server_events.iter().find(|event| match event {
+            ServerMessage::NewPlayerPosition(id, ..) => *id == user.id,
+            _ => false,
+        });
 
-        if keyboard_input.pressed(KeyCode::Space) {
-            velociy.linvel.y = 3.0;
-        }
-
-        for ev in mouse_input.iter() {
-            transform.rotation *= Quat::from_rotation_y(ev.delta.x * -0.01);
+        match move_user {
+            Some(ServerMessage::NewPlayerPosition(_, position, rotation)) => {
+                transform.translation = *position;
+                transform.rotation = *rotation;
+            }
+            _ => {}
         }
     }
 }
