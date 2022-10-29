@@ -1,3 +1,5 @@
+use std::vec;
+
 use crate::{data_channel::ServerMessage, user::User};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -7,12 +9,22 @@ pub fn spawn_player_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    players: Query<&User>,
 ) {
     events
         .iter()
         .filter_map(|message| match message {
-            ServerMessage::NewPlayerJoined(user_id) => Some(user_id),
-            _ => None,
+            ServerMessage::Snapshot { users } => Some(users.iter().map(|(id, _)| id).collect()),
+            ServerMessage::SetLocalUserId(id) => Some(vec![id]),
+            ServerMessage::NewPlayerJoined(id) => Some(vec![id]),
+        })
+        .flatten()
+        .filter_map(|id| {
+            if players.iter().find(|user| user.id == *id).is_none() {
+                Some(id)
+            } else {
+                None
+            }
         })
         .for_each(|user_id| {
             // Spawn a new player
@@ -31,7 +43,7 @@ pub fn spawn_player_system(
                 .insert(Velocity::zero())
                 .insert(Damping {
                     linear_damping: 2.,
-                    angular_damping: 2.,
+                    angular_damping: 5.,
                 })
                 .insert(User { id: *user_id });
         });
