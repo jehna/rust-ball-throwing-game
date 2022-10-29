@@ -23,7 +23,6 @@ pub async fn connect_websocket(
 
     tokio::spawn(async move {
         while let Some(message) = send_queue.recv().await {
-            println!("Sending message: {:?}", message);
             let message = bincode::serialize(&message).unwrap();
             write.send(Message::binary(message)).await.unwrap();
         }

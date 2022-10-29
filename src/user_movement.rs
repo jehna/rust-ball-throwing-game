@@ -1,34 +1,23 @@
-use crate::current_user::CurrentUser;
-use crate::data_channel::{ServerMessage, UserId};
-use bevy::prelude::Component;
-use bevy::{input::mouse::MouseMotion, prelude::*};
-use bevy_rapier3d::prelude::*;
+use bevy::prelude::*;
+use bevy_rapier3d::prelude::Velocity;
 
-#[derive(Component)]
-pub struct User {
-    pub id: UserId,
-}
+use crate::{data_channel::ServerMessage, user::User};
 
 pub fn user_movement(
-    current_user: Res<CurrentUser>,
-    mut server_events: EventReader<ServerMessage>,
-    mut component: Query<(&User, &mut Transform, &mut Velocity)>,
+    mut server_messages: EventReader<ServerMessage>,
+    mut users: Query<(&User, &mut Transform, &mut Velocity)>,
 ) {
-    for (user, mut transform, mut velociy) in &mut component {
-        if current_user.id.is_some() && user.id == current_user.id.unwrap() {
-            // Handle current user locally for now
-            continue;
-        }
-
-        let move_user = server_events.iter().find(|event| match event {
-            ServerMessage::NewPlayerPosition(id, ..) => *id == user.id,
-            _ => false,
-        });
-
-        match move_user {
-            Some(ServerMessage::NewPlayerPosition(_, position, rotation)) => {
-                transform.translation = *position;
-                transform.rotation = *rotation;
+    for message in server_messages.iter() {
+        match message {
+            ServerMessage::Snapshot { users: snapshot } => {
+                for (user, mut transform, mut velocity) in users.iter_mut() {
+                    if let Some(snapshot) = snapshot.get(&user.id) {
+                        transform.translation = snapshot.position;
+                        transform.rotation = snapshot.rotation;
+                        velocity.linvel = snapshot.linevel;
+                        velocity.angvel = snapshot.angvel;
+                    }
+                }
             }
             _ => {}
         }

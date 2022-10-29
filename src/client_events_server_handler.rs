@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
 use crate::{
     data_channel::{ClientMessage, ServerMessage, UserMessage},
-    user_movement::User,
+    user::User,
 };
 
 pub fn client_events_server_handler(
@@ -17,13 +17,23 @@ pub fn client_events_server_handler(
         .into_iter()
         .for_each(|user_message| {
             let UserMessage { user_id, message } = user_message;
+            let user = component.iter_mut().find(|(user, ..)| user.id == user_id);
+
             match message {
                 ClientMessage::Join => {
                     server_messages.send(ServerMessage::NewPlayerJoined(user_id))
                 }
-                ClientMessage::Move(position, rotation) => server_messages.send(
-                    ServerMessage::NewPlayerPosition(user_id, position, rotation),
-                ),
+                ClientMessage::Input {
+                    direction,
+                    rotation,
+                    jump,
+                } => {
+                    let (transform, velocity) = match user {
+                        Some((_, transform, velocity)) => (transform, velocity),
+                        None => return,
+                    };
+                    apply_client_input(transform, velocity, direction, rotation, jump);
+                }
             }
         });
 }
@@ -33,6 +43,21 @@ pub fn server_events_broadcaster(
     mut server_messages: EventReader<ServerMessage>,
 ) {
     for message in server_messages.iter() {
-        server_broadcaster.send(*message).unwrap();
+        server_broadcaster.send(message.clone()).unwrap();
+    }
+}
+
+pub fn apply_client_input(
+    transform: Mut<Transform>,
+    mut velocity: Mut<Velocity>,
+    direction: Vec2,
+    rotation: f32,
+    jump: bool,
+) {
+    velocity.angvel.y = rotation * -1.;
+    let movement = transform.forward() * direction.x + transform.right() * direction.y;
+    velocity.linvel += movement * 0.8;
+    if jump {
+        velocity.linvel.y = 3.0;
     }
 }

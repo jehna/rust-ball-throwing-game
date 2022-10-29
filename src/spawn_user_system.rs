@@ -1,4 +1,4 @@
-use crate::{data_channel::ServerMessage, user_movement::User};
+use crate::{data_channel::ServerMessage, user::User};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -27,8 +27,12 @@ pub fn spawn_player_system(
                 .insert(RigidBody::Dynamic)
                 .insert(Collider::cuboid(0.5, 0.5, 0.5))
                 .insert(LockedAxes::ROTATION_LOCKED)
-                .insert(Restitution::coefficient(0.7))
+                .insert(Restitution::coefficient(0.1))
                 .insert(Velocity::zero())
+                .insert(Damping {
+                    linear_damping: 2.,
+                    angular_damping: 2.,
+                })
                 .insert(User { id: *user_id });
         });
 }

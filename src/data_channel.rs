@@ -1,24 +1,37 @@
-use std::sync::{Arc, Mutex};
-
-use bevy::prelude::{Quat, Vec2, Vec3};
+use bevy::{
+    prelude::{Quat, Vec2, Vec3},
+    utils::HashMap,
+};
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 
-use crate::websocket::connect_websocket;
+use crate::{user::UserId, websocket::connect_websocket};
 
-pub type UserId = u16;
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PlayerSnapshot {
+    pub position: Vec3,
+    pub rotation: Quat,
+    pub linevel: Vec3,
+    pub angvel: Vec3,
+}
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ServerMessage {
-    NewPlayerPosition(UserId, Vec3, Quat),
     NewPlayerJoined(UserId),
     SetLocalUserId(UserId),
+    Snapshot {
+        users: HashMap<UserId, PlayerSnapshot>,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum ClientMessage {
     Join,
-    Move(Vec3, Quat),
+    Input {
+        direction: Vec2,
+        rotation: f32,
+        jump: bool,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]

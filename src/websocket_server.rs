@@ -1,4 +1,5 @@
-use crate::data_channel::{ClientMessage, ServerMessage, UserId, UserMessage};
+use crate::data_channel::{ClientMessage, ServerMessage, UserMessage};
+use crate::user::UserId;
 use futures_util::{SinkExt, StreamExt};
 use std::io::Error;
 use std::sync::{Arc, Mutex};
@@ -92,7 +93,6 @@ async fn accept_connection(
     tokio::spawn(async move {
         while let Some(message) = read.next().await {
             let message = message.unwrap();
-            println!("Received a message from {}: {}", addr, message);
             on_message
                 .send(UserMessage {
                     user_id,
