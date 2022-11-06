@@ -5,15 +5,13 @@ use rust_ball_throwing_multipleyer_game::client_message_sender::{
 };
 use rust_ball_throwing_multipleyer_game::current_user::{current_user_system, CurrentUser};
 use rust_ball_throwing_multipleyer_game::cursor_grab_system::cursor_grab_system;
-use rust_ball_throwing_multipleyer_game::data_channel::{
-    create_data_channel, ClientMessage, ServerMessage,
-};
+use rust_ball_throwing_multipleyer_game::data_channel::{create_data_channel, ServerMessage};
 use rust_ball_throwing_multipleyer_game::env::Environment;
 use rust_ball_throwing_multipleyer_game::optimistic_local_movement::optimistic_local_movement;
 use rust_ball_throwing_multipleyer_game::server_message_handler_system::server_message_handler_system;
 use rust_ball_throwing_multipleyer_game::spawn_user_system::spawn_player_system;
 use rust_ball_throwing_multipleyer_game::spawn_world::spawn_world;
-use rust_ball_throwing_multipleyer_game::user_input::user_input;
+use rust_ball_throwing_multipleyer_game::user_input::{user_input, ClientMessagesQueue};
 use rust_ball_throwing_multipleyer_game::user_movement::user_movement;
 
 #[tokio::main]
@@ -32,7 +30,7 @@ async fn main() {
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(spawn_world)
         .add_event::<ServerMessage>()
-        .add_event::<ClientMessage>()
+        .insert_resource(ClientMessagesQueue::new())
         .add_system(user_movement)
         .add_system(user_input)
         .add_system(server_message_handler_system)

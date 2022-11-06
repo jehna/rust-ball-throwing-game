@@ -1,11 +1,10 @@
 use std::vec;
 
-use crate::{data_channel::ServerMessage, env::Environment, user::User};
+use crate::{data_channel::ServerMessage, user::User};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 pub fn spawn_player_system(
-    env: Res<Environment>,
     mut events: EventReader<ServerMessage>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -37,11 +36,7 @@ pub fn spawn_player_system(
                     transform: cube_transform,
                     ..default()
                 })
-                .insert(if env.is_server() {
-                    RigidBody::Dynamic
-                } else {
-                    RigidBody::KinematicPositionBased
-                })
+                .insert(RigidBody::Dynamic)
                 .insert(Collider::cuboid(0.5, 0.5, 0.5))
                 .insert(LockedAxes::ROTATION_LOCKED)
                 .insert(Restitution::coefficient(0.1))

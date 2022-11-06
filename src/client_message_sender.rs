@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::data_channel::{ClientDataChannelResource, ClientMessage};
+use crate::{
+    data_channel::{ClientDataChannelResource, ClientMessage},
+    user_input::ClientMessagesQueue,
+};
 
 pub struct ClientMessageSendTimer {
     timer: Timer,
@@ -18,13 +21,14 @@ pub fn client_message_sender(
     time: Res<Time>,
     data_channel: Res<ClientDataChannelResource>,
     mut send_timer: ResMut<ClientMessageSendTimer>,
-    mut client_messages: EventReader<ClientMessage>,
+    mut client_message_queue: ResMut<ClientMessagesQueue>,
 ) {
     send_timer.timer.tick(time.delta());
-    if send_timer.timer.just_finished() && !client_messages.is_empty() {
-        let message = combine_pending(client_messages.iter());
+    if send_timer.timer.just_finished() && !client_message_queue.is_empty() {
+        let message = combine_pending(client_message_queue.iter());
 
         data_channel.sender.try_send(message).unwrap();
+        client_message_queue.clear();
     }
 }
 

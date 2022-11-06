@@ -1,6 +1,8 @@
 use crate::data_channel::ClientMessage;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
+pub type ClientMessagesQueue = Vec<ClientMessage>;
+
 type PlayerDirection = Vec2;
 
 pub trait PlayerDirectionTrait {
@@ -22,7 +24,7 @@ impl PlayerDirectionTrait for Vec2 {
 pub fn user_input(
     keyboard_input: Res<Input<KeyCode>>,
     mut mouse_input: EventReader<MouseMotion>,
-    mut client_messages: EventWriter<ClientMessage>,
+    mut client_messages_queue: ResMut<ClientMessagesQueue>,
 ) {
     let mut direction = PlayerDirection::NONE;
     if keyboard_input.pressed(KeyCode::W) {
@@ -49,7 +51,7 @@ pub fn user_input(
         return;
     }
 
-    client_messages.send(ClientMessage::Input {
+    client_messages_queue.push(ClientMessage::Input {
         direction,
         rotation,
         jump,
