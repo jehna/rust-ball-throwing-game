@@ -3,6 +3,7 @@ pub mod client_message_sender;
 pub mod current_user;
 pub mod cursor_grab_system;
 pub mod data_channel;
+pub mod env;
 pub mod optimistic_local_movement;
 pub mod server_debug_camera;
 pub mod server_message_handler_system;

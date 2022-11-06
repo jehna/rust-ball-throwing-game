@@ -5,6 +5,7 @@ use rust_ball_throwing_multipleyer_game::client_events_server_handler::{
 };
 use rust_ball_throwing_multipleyer_game::current_user::CurrentUser;
 use rust_ball_throwing_multipleyer_game::data_channel::ServerMessage;
+use rust_ball_throwing_multipleyer_game::env::Environment;
 use rust_ball_throwing_multipleyer_game::server_debug_camera::server_debug_camera;
 use rust_ball_throwing_multipleyer_game::server_snapshot_sender::{
     server_snapshot_sender, ServerSnapshotSenderTimer,
@@ -18,6 +19,7 @@ use rust_ball_throwing_multipleyer_game::websocket_server::spawn_websocket_serve
 async fn main() {
     let (server_broadcaster, client_events) = spawn_websocket_server();
     App::new()
+        .insert_resource(Environment::Server)
         .insert_resource(WindowDescriptor {
             title: "Server".to_string(),
             width: 320.,

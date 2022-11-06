@@ -8,6 +8,7 @@ use rust_ball_throwing_multipleyer_game::cursor_grab_system::cursor_grab_system;
 use rust_ball_throwing_multipleyer_game::data_channel::{
     create_data_channel, ClientMessage, ServerMessage,
 };
+use rust_ball_throwing_multipleyer_game::env::Environment;
 use rust_ball_throwing_multipleyer_game::optimistic_local_movement::optimistic_local_movement;
 use rust_ball_throwing_multipleyer_game::server_message_handler_system::server_message_handler_system;
 use rust_ball_throwing_multipleyer_game::spawn_user_system::spawn_player_system;
@@ -18,6 +19,7 @@ use rust_ball_throwing_multipleyer_game::user_movement::user_movement;
 #[tokio::main]
 async fn main() {
     App::new()
+        .insert_resource(Environment::Client)
         .insert_resource(WindowDescriptor {
             title: "Client".to_string(),
             width: 320.,
