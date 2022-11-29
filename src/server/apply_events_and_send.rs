@@ -5,7 +5,7 @@ use super::{
 use crate::game_state::{GameState, GameStateConstraint};
 use bevy::{ecs::system::Resource, prelude::*};
 
-pub fn apply_events_and_send_on_tick<State, Action>(
+pub fn apply_events_and_send<State, Action>(
     mut state: ResMut<GameState<State>>,
     mut future_actions: ResMut<FutureActions<Action>>,
     state_applier: Res<ServerStateApplier<Action, State>>,
