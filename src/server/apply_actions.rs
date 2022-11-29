@@ -29,7 +29,8 @@ where
 #[cfg(test)]
 mod tests {
 
-    use super::super::server_future_actions::Event;
+    use crate::{game_event::GameEvent, game_state::Tick};
+
     use super::*;
 
     #[derive(Debug, PartialEq, Clone)]
@@ -46,56 +47,26 @@ mod tests {
 
     #[test]
     fn should_apply_single_action() {
-        let mut future_actions = vec![(
-            0,
-            vec![Event {
-                tick: 0,
-                action: Direction::Left,
-            }],
-        )]
-        .into_iter()
-        .collect();
-        let mut state = GameState {
-            tick: 0,
-            state: Direction::Right,
-        };
+        let mut future_actions = vec![(Tick::nth(0), vec![GameEvent::new(0, Direction::Left)])]
+            .into_iter()
+            .collect();
+        let mut state = GameState::new(0, Direction::Right);
 
         DIR_APPLIER.apply_actions(&mut future_actions, &mut state);
 
-        assert_eq!(
-            state,
-            GameState {
-                tick: 0,
-                state: Direction::Left
-            }
-        );
+        assert_eq!(state, GameState::new(0, Direction::Left));
     }
 
     #[test]
     fn should_remove_actions_after_applying() {
         let mut future_actions = vec![
-            (
-                0,
-                vec![Event {
-                    tick: 0,
-                    action: Direction::Left,
-                }],
-            ),
-            (
-                1,
-                vec![Event {
-                    tick: 1,
-                    action: Direction::Right,
-                }],
-            ),
+            (Tick::nth(0), vec![GameEvent::new(0, Direction::Left)]),
+            (Tick::nth(1), vec![GameEvent::new(1, Direction::Right)]),
         ]
         .into_iter()
         .collect();
 
-        let mut state = GameState {
-            tick: 0,
-            state: Direction::Right,
-        };
+        let mut state = GameState::new(0, Direction::Right);
 
         DIR_APPLIER.apply_actions(&mut future_actions, &mut state);
 
@@ -105,34 +76,19 @@ mod tests {
     #[test]
     fn should_apply_multiple_events() {
         let mut future_actions = vec![(
-            0,
+            Tick::nth(0),
             vec![
-                Event {
-                    tick: 0,
-                    action: Direction::Left,
-                },
-                Event {
-                    tick: 0,
-                    action: Direction::Right,
-                },
+                GameEvent::new(0, Direction::Left),
+                GameEvent::new(0, Direction::Right),
             ],
         )]
         .into_iter()
         .collect();
 
-        let mut state = GameState {
-            tick: 0,
-            state: Direction::Right,
-        };
+        let mut state = GameState::new(0, Direction::Right);
 
         DIR_APPLIER.apply_actions(&mut future_actions, &mut state);
 
-        assert_eq!(
-            state,
-            GameState {
-                tick: 0,
-                state: Direction::Right
-            }
-        );
+        assert_eq!(state, GameState::new(0, Direction::Right));
     }
 }

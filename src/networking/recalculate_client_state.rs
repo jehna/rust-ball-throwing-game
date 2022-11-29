@@ -16,7 +16,7 @@ where
         received_state_from_server: GameState<T>,
         client_states: &mut Vec<GameState<T>>,
     ) {
-        let server_tick = received_state_from_server.tick;
+        let server_tick = received_state_from_server.tick.clone();
 
         // Set the server state as the first item discarding all older states
         client_states.retain(|state| state.tick > server_tick);
@@ -37,13 +37,14 @@ where
 
 #[cfg(test)]
 mod test {
+    use std::borrow::Borrow;
+
+    use crate::game_state::Tick;
+
     use super::*;
 
     fn simple_next_state_fn(game_state: &GameState<()>) -> GameState<()> {
-        GameState {
-            tick: game_state.tick + 1,
-            state: (),
-        }
+        game_state.map_next(|_| ())
     }
 
     #[test]
@@ -52,11 +53,14 @@ mod test {
             next_state_fn: simple_next_state_fn,
         };
         let mut client_states = vec![];
-        let server_state = GameState { tick: 0, state: () };
+        let server_state = GameState {
+            tick: Tick::nth(0),
+            state: (),
+        };
 
         c.recalculate_client_state(server_state, &mut client_states);
 
-        assert_eq!(client_states, vec![GameState { tick: 0, state: () }]);
+        assert_eq!(client_states, vec![GameState::new(0, ())]);
     }
 
     #[test]
@@ -65,49 +69,43 @@ mod test {
             next_state_fn: simple_next_state_fn,
         };
         let mut client_states = vec![
-            GameState { tick: 0, state: () },
-            GameState { tick: 1, state: () },
-            GameState { tick: 2, state: () },
+            GameState::new(0, ()),
+            GameState::new(1, ()),
+            GameState::new(2, ()),
         ];
-        let server_state = GameState { tick: 1, state: () };
+        let server_state = GameState::new(1, ());
 
         c.recalculate_client_state(server_state, &mut client_states);
 
         assert_eq!(
             client_states,
-            vec![
-                GameState { tick: 1, state: () },
-                GameState { tick: 2, state: () }
-            ]
+            vec![GameState::new(1, ()), GameState::new(2, ())]
         );
     }
 
     #[test]
     fn should_recalculate_client_states() {
         let c = ClientStateRecalculator {
-            next_state_fn: |s| GameState {
-                tick: s.tick + 1,
-                state: s.state + 1,
-            },
+            next_state_fn: |game_state| game_state.map_next(|state| state + 1),
         };
         let mut client_states = vec![
-            GameState { tick: 0, state: 10 },
-            GameState { tick: 1, state: 11 },
-            GameState { tick: 2, state: 12 },
-            GameState { tick: 3, state: 13 },
-            GameState { tick: 4, state: 14 },
+            GameState::new(0, 10),
+            GameState::new(1, 11),
+            GameState::new(2, 12),
+            GameState::new(3, 13),
+            GameState::new(4, 14),
         ];
-        let server_state = GameState { tick: 1, state: 21 };
+        let server_state = GameState::new(1, 21);
 
         c.recalculate_client_state(server_state, &mut client_states);
 
         assert_eq!(
             client_states,
             vec![
-                GameState { tick: 1, state: 21 },
-                GameState { tick: 2, state: 22 },
-                GameState { tick: 3, state: 23 },
-                GameState { tick: 4, state: 24 },
+                GameState::new(1, 21),
+                GameState::new(2, 22),
+                GameState::new(3, 23),
+                GameState::new(4, 24),
             ]
         );
     }

@@ -1,6 +1,5 @@
-use crate::networking::on_tick::{self, on_tick};
-
 use super::apply_events_and_send::apply_events_and_send;
+use crate::networking::on_tick::on_tick;
 use bevy::prelude::*;
 
 pub struct ServerPlugin;

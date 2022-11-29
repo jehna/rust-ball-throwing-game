@@ -1,20 +1,13 @@
 use std::collections::HashMap;
 
-use crate::game_state::Tick;
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Event<Action> {
-    pub tick: Tick,
-    pub action: Action,
-}
-
-pub type FutureActions<Action> = HashMap<Tick, Vec<Event<Action>>>;
+use crate::{game_event::GameEvent, game_state::Tick};
+pub type FutureActions<Action> = HashMap<Tick, Vec<GameEvent<Action>>>;
 
 pub fn add_future_actions<Action>(
     future_actions: &mut FutureActions<Action>,
-    action: Event<Action>,
+    action: GameEvent<Action>,
 ) {
-    let tick = action.tick;
+    let tick = action.tick.clone();
     let actions = future_actions.entry(tick).or_insert_with(Vec::new);
     actions.push(action);
 }
@@ -22,44 +15,29 @@ pub fn add_future_actions<Action>(
 #[test]
 fn should_add_future_action_to_empty_actions_map() {
     let mut future_actions = FutureActions::new();
-    let action = Event {
-        tick: 0,
-        action: "Hello",
-    };
+    let action = GameEvent::new(0, "Hello");
 
     add_future_actions(&mut future_actions, action);
 
     assert_eq!(
         future_actions,
-        vec![(
-            0,
-            vec![Event {
-                tick: 0,
-                action: "Hello"
-            }]
-        )]
-        .into_iter()
-        .collect()
+        vec![(Tick::nth(0), vec![GameEvent::new(0, "Hello")])]
+            .into_iter()
+            .collect()
     );
 }
 
 #[test]
 fn should_add_action_to_correct_place() {
     let mut future_actions = vec![
-        (0, vec![]),
-        (
-            1,
-            vec![Event {
-                tick: 1,
-                action: "Hello",
-            }],
-        ),
-        (2, vec![]),
+        (Tick::nth(0), vec![]),
+        (Tick::nth(1), vec![GameEvent::new(1, "Hello")]),
+        (Tick::nth(2), vec![]),
     ]
     .into_iter()
     .collect();
-    let action = Event {
-        tick: 1,
+    let action = GameEvent {
+        tick: Tick::nth(1),
         action: "World",
     };
 
@@ -68,21 +46,12 @@ fn should_add_action_to_correct_place() {
     assert_eq!(
         future_actions,
         vec![
-            (0, vec![]),
+            (Tick::nth(0), vec![]),
             (
-                1,
-                vec![
-                    Event {
-                        tick: 1,
-                        action: "Hello",
-                    },
-                    Event {
-                        tick: 1,
-                        action: "World",
-                    }
-                ]
+                Tick::nth(1),
+                vec![GameEvent::new(1, "Hello",), GameEvent::new(1, "World",)]
             ),
-            (2, vec![])
+            (Tick::nth(2), vec![])
         ]
         .into_iter()
         .collect()
