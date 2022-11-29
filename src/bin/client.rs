@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rust_ball_throwing_multipleyer_game::client::client_plugin::ClientPlugin;
 
 #[tokio::main]
 async fn main() {
@@ -11,5 +12,6 @@ async fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(ClientPlugin)
         .run();
 }
