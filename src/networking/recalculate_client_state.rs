@@ -1,15 +1,15 @@
-use crate::game_state::GameState;
+use crate::game_state::{GameState, GameStateConstraint};
 
 pub struct ClientStateRecalculator<T>
 where
-    T: PartialEq + Clone,
+    T: GameStateConstraint,
 {
     next_state_fn: fn(&GameState<T>) -> GameState<T>,
 }
 
 impl<T> ClientStateRecalculator<T>
 where
-    T: PartialEq + Clone,
+    T: GameStateConstraint,
 {
     pub fn recalculate_client_state(
         &self,

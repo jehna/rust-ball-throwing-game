@@ -1,17 +1,17 @@
-use crate::game_state::GameState;
+use crate::game_state::{GameState, GameStateConstraint};
 
 use super::server_future_actions::FutureActions;
 
 pub struct ServerStateApplier<Action, State = Action>
 where
-    State: PartialEq + Clone,
+    State: GameStateConstraint,
 {
     apply_action: fn(&mut GameState<State>, Action),
 }
 
 impl<Action, State> ServerStateApplier<Action, State>
 where
-    State: PartialEq + Clone,
+    State: GameStateConstraint,
 {
     pub fn apply_actions(
         &self,

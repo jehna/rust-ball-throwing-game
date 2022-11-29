@@ -1,17 +1,17 @@
 use std::sync::mpsc::SyncSender;
 
-use crate::game_state::GameState;
+use crate::game_state::{GameState, GameStateConstraint};
 
 pub struct BroadcastClients<State>
 where
-    State: PartialEq + Clone,
+    State: GameStateConstraint,
 {
     connections: Vec<SyncSender<GameState<State>>>,
 }
 
 impl<State> BroadcastClients<State>
 where
-    State: PartialEq + Clone,
+    State: GameStateConstraint,
 {
     pub fn broadcast(&self, state: &GameState<State>) {
         for client_connection in self.connections.iter() {
