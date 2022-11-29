@@ -2,14 +2,14 @@ use crate::game_state::GameState;
 
 pub struct ClientStateRecalculator<T>
 where
-    T: PartialEq,
+    T: PartialEq + Clone,
 {
     next_state_fn: fn(&GameState<T>) -> GameState<T>,
 }
 
 impl<T> ClientStateRecalculator<T>
 where
-    T: PartialEq,
+    T: PartialEq + Clone,
 {
     pub fn recalculate_client_state(
         &self,
