@@ -37,11 +37,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use std::borrow::Borrow;
-
-    use crate::game_state::Tick;
-
     use super::*;
+    use crate::game_state::Tick;
 
     fn simple_next_state_fn(game_state: &GameState<()>) -> GameState<()> {
         game_state.map_next(|_| ())

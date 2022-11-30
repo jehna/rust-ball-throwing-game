@@ -1,2 +1,2 @@
 pub mod on_tick;
-mod recalculate_client_state;
+pub mod recalculate_client_state;
